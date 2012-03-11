@@ -39,7 +39,7 @@ class FormFillTest(TestCase):
         self.assertEquals("Teller", browser.query("#last_name").val())
         self.assertEquals("teller@lanl.gov", browser.query("#email_address").val())
 
-class FormManagerTest(TestCase):
+class FormSerializationTest(TestCase):
 
     def test_form_value_list_simple(self):
         browser = get_browser()
