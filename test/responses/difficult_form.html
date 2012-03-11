@@ -1,0 +1,32 @@
+<html>
+  <body>
+
+    <form name="difficult-form" id="difficult-form"
+          action="/form-post" method="POST">
+
+      <fieldset id="person_info">
+        <input type="text" name="first_name">
+        <input type="text" name="last_name">
+      </fieldset>
+
+      <fieldset id="contact_info">
+        <input type="text" name="email_address">
+        <input type="text" name="phone" value="who uses phones?" disabled>
+        <input type="checkbox" name="contact_me" value="yes" checked>E-mail me spam every day
+      </fieldset>
+
+      <fieldset id="blather">
+        Tell us about yourself:
+
+        <textarea name="biography"></textarea>
+      </fieldset>
+
+
+      <fieldset id="wrap_it_up">
+        <input type="checkbox" name="legal_agree">I agree to the legal mumbo jumbo.
+        <button type="submit">Done</button>
+      </fieldset>
+    </form>
+
+  </body>
+</html>
