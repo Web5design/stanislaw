@@ -11,6 +11,22 @@ class SubmitException(Exception):
     pass
 
 
+
+# Form value getters that aren't straightforward
+def get_select_val(element):
+    # TODO: only returns the first selected value
+    for child in element.getiterator():
+        if child.tag != "option":
+            continue
+        if "disabled" in child.attrib:
+            continue
+        if "selected" in child.attrib:
+            return child.attrib.get("value", "")
+
+def get_textarea_val(element):
+    return element.text or ""
+
+
 class FormManager(object):
     def __init__(self, browser):
         self.browser = browser
@@ -42,18 +58,32 @@ class FormManager(object):
         attributes = element.attrib
         if "name" not in attributes:
             return False
-        if "type" not in attributes:
-            return False
         if "disabled" in attributes:
             return False
         if "checked" in attributes:
             return True
         if re.match(SELECT_TEXTAREA, element.tag):
             return True
-        if re.match(INPUT_TYPES, attributes["type"]):
+        if re.match(INPUT_TYPES, attributes.get("type", "")):
             return True
 
         return False
+
+    def _form_element_value(self, element):
+        # PyQuery fucks this up, borrowing-ish from jQuery
+        # My complements to Resig, jQuery is quite slick in how it does .val()
+
+        if "value" in element.attrib:
+            return element.attrib["value"]
+
+        if element.tag == "select":
+            return get_select_val(element)
+
+        if element.tag == "textarea":
+            return get_textarea_val(element)
+
+        return ""
+
 
     def form_value_list(self, form_selector=None):
         form = self.find_form(form_selector)
@@ -61,9 +91,8 @@ class FormManager(object):
 
         for descendant in form.getiterator():
             if self._is_submittable_form_element(descendant):
-                attributes = descendant.attrib
-                value_list.append((attributes["name"],
-                                   attributes.get("value", "")))
+                val = self._form_element_value(descendant)
+                value_list.append((descendant.attrib["name"], val))
 
         return value_list
 
