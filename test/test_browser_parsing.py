@@ -1,5 +1,6 @@
 from unittest import TestCase
 from stanislaw.browser import Browser
+from stanislaw.forms import UnknownFormInput
 from test.util import response_from_file
 
 BASIC_FORM = "basic_form.html"
@@ -33,7 +34,8 @@ class FormFillTest(TestCase):
 
     def test_fill_nonexistant_element(self):
         browser = get_browser()
-        browser.fill({"#does_not_exist": "bad_value"})
+        self.assertRaises(UnknownFormInput, browser.fill,
+                          {"#does_not_exist": "bad_value"})
 
         self.assertEquals("Edward", browser.query("#first_name").val())
         self.assertEquals("Teller", browser.query("#last_name").val())

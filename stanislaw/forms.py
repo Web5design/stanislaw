@@ -1,4 +1,6 @@
 import re
+import urllib
+import urllib2
 
 # Borrowed from jQuery
 INPUT_TYPES = re.compile("^(color|date|datetime|datetime-local|email|"
@@ -10,6 +12,8 @@ SELECT_TEXTAREA = re.compile("^(select|textarea)$", re.IGNORECASE)
 class SubmitException(Exception):
     pass
 
+class UnknownFormInput(Exception):
+    pass
 
 
 # Form value getters that aren't straightforward
@@ -33,7 +37,19 @@ class FormManager(object):
 
     def fill(self, selector_value_dict):
         for selector, value in selector_value_dict.items():
-            self.browser.query(selector).val(value)
+            form_element = self.browser.query(selector)
+            if not form_element:
+                raise UnknownFormInput(selector)
+            self._set_value(form_element, value)
+
+    def _set_value(self, form_element, value):
+        for element in form_element:
+            # PyQuery array
+            if element.tag == "input" and (element.type == "checkbox"
+                                           or element.type=="radio"):
+                element.checked = bool(value)
+            else:
+                element.value = unicode(value)
 
     def find_form(self, form_selector=None):
         if form_selector:
@@ -96,3 +112,17 @@ class FormManager(object):
 
         return value_list
 
+    def get_submit_request(self, form_selector=None):
+        form = self.find_form()
+        method = form.attrib["method"].lower()
+        action = form.attrib["action"].lower()
+
+        form_values = self.form_value_list(form_selector)
+        encoded_values = urllib.urlencode(form_values)
+        if method == "get":
+            url = action + "?" + encoded_values
+            request = urllib2.Request(url)
+        if method == "post":
+            request = urllib2.Request(action, encoded_values)
+
+        return request
