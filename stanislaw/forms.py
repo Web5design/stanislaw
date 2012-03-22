@@ -113,7 +113,7 @@ class FormManager(object):
         return value_list
 
     def get_submit_request(self, form_selector=None):
-        form = self.find_form()
+        form = self.find_form(form_selector)
         method = form.attrib["method"].lower()
         action = form.attrib["action"].lower()
 

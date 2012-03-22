@@ -1,6 +1,7 @@
 from unittest import TestCase
 from stanislaw.browser import Browser
 from stanislaw.forms import UnknownFormInput
+from stanislaw.forms import SubmitException
 from test.util import response_from_file
 
 BASIC_FORM = "basic_form.html"
@@ -93,3 +94,15 @@ class FormSerializationTest(TestCase):
 
         self.assertIn(("biography", ""), value_list)
         self.assertIn(("filled_textarea", "Textarea content"), value_list)
+
+
+class MultipleFormTest(TestCase):
+    def test_ambiguous_submit(self):
+        browser = get_browser(response_file="multiple_forms.html")
+        self.assertRaises(SubmitException,
+                          browser.form_manager.get_submit_request)
+
+    def test_precise_submit(self):
+        browser = get_browser(response_file="multiple_forms.html")
+        request = browser.form_manager.get_submit_request("#form2")
+        self.assertTrue(request)
